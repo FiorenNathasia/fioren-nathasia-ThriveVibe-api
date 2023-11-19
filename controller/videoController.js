@@ -12,7 +12,6 @@ const createVideoEntry = async (req, res) => {
   try {
     const decodedToken = jwt.verify(authToken, process.env.JWT_KEY);
     userId = decodedToken.id;
-    console.log(userId);
   } catch (error) {
     console.log(error);
     res.status(401).send("Invalid auth token");
@@ -36,6 +35,29 @@ const createVideoEntry = async (req, res) => {
     res.status(201).json(insertedVideo);
   } catch (error) {
     res.status(500).json({ message: `Error adding Item: ${error}` });
+  }
+};
+
+const getVideos = async (req, res) => {
+  if (!req.headers.authorization) {
+    res.status(401).send("Please login");
+    return;
+  }
+  const authToken = req.headers.authorization.split(" ")[1];
+  let userId;
+  try {
+    const decodedToken = jwt.verify(authToken, process.env.JWT_KEY);
+    userId = decodedToken.id;
+  } catch (error) {
+    console.log(error);
+    res.status(401).send("Invalid auth token");
+  }
+
+  try {
+    const videos = await knex("videos").where({ user_id: userId }).select();
+    res.status(200).json(videos);
+  } catch (error) {
+    res.status(500).json({ message: `Error retrieving videos: ${error}` });
   }
 };
 
@@ -118,4 +140,5 @@ module.exports = {
   createVideoEntry,
   updateUpvote,
   updateDownvote,
+  getVideos,
 };
