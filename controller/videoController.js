@@ -1,16 +1,32 @@
 const router = require("express").Router();
+const jwt = require("jsonwebtoken");
 const knex = require("knex")(require("../knexfile"));
 
 const createVideoEntry = async (req, res) => {
-  // TODO: Get user_id from authå
-  const { user_id, url, prompt } = req.body;
+  if (!req.headers.authorization) {
+    res.status(401).send("Please login");
+    return;
+  }
+  const authToken = req.headers.authorization.split(" ")[1];
+  let userId;
+  try {
+    const decodedToken = jwt.verify(authToken, process.env.JWT_KEY);
+    userId = decodedToken.id;
+    console.log(userId);
+  } catch (error) {
+    console.log(error);
+    res.status(401).send("Invalid auth token");
+  }
+
+  // TODO: Get user_id from auth
+  const { url, prompt } = req.body;
 
   if (!url || !prompt) {
     res.status(400).json({ message: `Please fill in all fields` });
   }
   try {
     const newVideoEntry = {
-      user_id,
+      user_id: userId,
       url,
       prompt,
     };
