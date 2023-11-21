@@ -9,5 +9,6 @@ router.post("/newvideo", videoController.createVideoEntry);
 router.get("/", videoController.getVideos);
 router.put("/:id/upvote", videoController.updateUpvote);
 router.put("/:id/downvote", videoController.updateDownvote);
+router.put("/:id/vote", videoController.updateVote);
 
 module.exports = router;

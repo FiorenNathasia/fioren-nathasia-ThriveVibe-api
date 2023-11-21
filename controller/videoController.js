@@ -136,9 +136,53 @@ const updateDownvote = async (req, res) => {
   }
 };
 
+//PUT Request for vote
+const updateVote = async (req, res) => {
+  const videoId = req.params.id;
+  const voteType = req.body.voteType;
+
+  try {
+    const video = await knex("videos").where({ id: videoId }).first();
+
+    if (!video) {
+      return res
+        .status(404)
+        .json({ message: `Video with ID ${videoId} not found` });
+    }
+
+    // Determine the type of vote
+    let currentVotes, newVotes;
+
+    if (voteType === "upvote") {
+      currentVotes = video.upvote || 0;
+      newVotes = currentVotes + 1;
+      await knex("videos").where({ id: videoId }).update({ upvote: newVotes });
+    } else if (voteType === "downvote") {
+      currentVotes = video.downvote || 0;
+      newVotes = currentVotes + 1;
+      await knex("videos")
+        .where({ id: videoId })
+        .update({ downvote: newVotes });
+    } else {
+      return res
+        .status(400)
+        .json({ message: 'Invalid voteType. Use "upvote" or "downvote".' });
+    }
+
+    // Fetch updated video entry
+    const updatedVideo = await knex("videos").where({ id: videoId }).first();
+
+    res.status(200).json(updatedVideo);
+  } catch (error) {
+    console.error(`Error updating vote for video with ID ${videoId}: ${error}`);
+    res.status(500).json({ message: `Error updating vote count` });
+  }
+};
+
 module.exports = {
   createVideoEntry,
   updateUpvote,
   updateDownvote,
   getVideos,
+  updateVote,
 };
