@@ -9,9 +9,9 @@ const getFeed = async (req, res) => {
   }
 
   const authToken = req.headers.authorization.split(" ")[1];
-
+  let decoded;
   try {
-    const decoded = jwt.verify(authToken, process.env.JWT_KEY);
+    decoded = jwt.verify(authToken, process.env.JWT_KEY);
     // You can use the decoded payload if needed
   } catch (error) {
     res.status(401).send("Invalid auth token");
@@ -19,8 +19,9 @@ const getFeed = async (req, res) => {
   }
 
   try {
-    // Assuming 'videos' is your database table name
-    const videos = await knex("videos").select("*");
+    const videos = await knex("videos")
+      .select("*")
+      .where("user_id", "!=", decoded.id);
 
     // Sorting videos based on timestamp
     const sortedVideos = videos.sort((a, b) => b.timestamp - a.timestamp);
