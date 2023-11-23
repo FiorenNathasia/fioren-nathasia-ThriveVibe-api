@@ -7,6 +7,7 @@ const videoController = require("../controller/videoController");
 
 router.post("/newvideo", videoController.createVideoEntry);
 router.get("/", videoController.getVideos);
+router.get("/:id", videoController.getVideo);
 router.put("/:id/upvote", videoController.updateUpvote);
 router.put("/:id/downvote", videoController.updateDownvote);
 router.put("/:id/vote", videoController.updateVote);

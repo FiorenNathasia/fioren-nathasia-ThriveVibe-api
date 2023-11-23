@@ -12,7 +12,6 @@ const getFeed = async (req, res) => {
   let decoded;
   try {
     decoded = jwt.verify(authToken, process.env.JWT_KEY);
-    // You can use the decoded payload if needed
   } catch (error) {
     res.status(401).send("Invalid auth token");
     return;
@@ -23,13 +22,8 @@ const getFeed = async (req, res) => {
       .select("*")
       .where("user_id", "!=", decoded.id);
 
-    // Sorting videos based on timestamp
     const sortedVideos = videos.sort((a, b) => b.timestamp - a.timestamp);
-
-    // Take the first 30 videos
     const newestVideos = sortedVideos.slice(0, 30);
-
-    // Now newestVideos contains the 30 newest videos, sorted from latest to oldest
     res.status(200).json(newestVideos);
   } catch (error) {
     res

@@ -2,6 +2,7 @@ const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const knex = require("knex")(require("../knexfile"));
 
+//POST request for new feature//
 const createVideoEntry = async (req, res) => {
   if (!req.headers.authorization) {
     res.status(401).send("Please login");
@@ -16,8 +17,6 @@ const createVideoEntry = async (req, res) => {
     console.log(error);
     res.status(401).send("Invalid auth token");
   }
-
-  // TODO: Get user_id from auth
   const { url, prompt } = req.body;
 
   if (!url || !prompt) {
@@ -38,6 +37,7 @@ const createVideoEntry = async (req, res) => {
   }
 };
 
+//GET request for user's videos//
 const getVideos = async (req, res) => {
   if (!req.headers.authorization) {
     res.status(401).send("Please login");
@@ -61,12 +61,47 @@ const getVideos = async (req, res) => {
   }
 };
 
+//GET request for a single video by id//
+const getVideo = async (req, res) => {
+  if (!req.headers.authorization) {
+    res.status(401).send("Please login");
+    return;
+  }
+
+  const authToken = req.headers.authorization.split(" ")[1];
+  let userId;
+
+  try {
+    const decodedToken = jwt.verify(authToken, process.env.JWT_KEY);
+    userId = decodedToken.id;
+  } catch (error) {
+    console.log(error);
+    res.status(401).send("Invalid auth token");
+    return;
+  }
+
+  const videoId = req.params.id;
+
+  if (!videoId) {
+    res.status(400).json({ message: "Video ID is required" });
+    return;
+  }
+
+  try {
+    const video = await knex("videos").where({ id: videoId }).select().first();
+
+    if (!video) {
+      res.status(404).json({ message: "Video not found" });
+      return;
+    }
+
+    res.status(200).json(video);
+  } catch (error) {
+    res.status(500).json({ message: `Error retrieving video: ${error}` });
+  }
+};
+
 //PUT request for upvote//
-// get the video id from the url
-// get ^that video from the table
-// get the current upvote count of ^that video (access that column)
-// calculate what the NEW upvote count will be (current upvote + 1)
-// EDIT that video entry, by replacing the current upvote count with the NEW upvote count
 const updateUpvote = async (req, res) => {
   const videoId = req.params.id;
 
@@ -79,18 +114,10 @@ const updateUpvote = async (req, res) => {
         .json({ message: `Video with ID ${videoId} not found` });
     }
 
-    // Get the current upvote count
     const currentUpvotes = video.upvote || 0;
-
-    // Calculate the new upvote count
     const newUpvotes = currentUpvotes + 1;
-
-    // Update the video entry
     await knex("videos").where({ id: videoId }).update({ upvote: newUpvotes });
-
-    // Fetch the updated video entry
     const updatedVideo = await knex("videos").where({ id: videoId }).first();
-
     res.status(200).json(updatedVideo);
   } catch (error) {
     console.error(
@@ -113,20 +140,12 @@ const updateDownvote = async (req, res) => {
         .json({ message: `Video with ID ${videoId} not found` });
     }
 
-    // Get the current downvote count
     const currentDownvotes = video.downvote || 0;
-
-    // Calculate the new dowmvote count
     const newDownvotes = currentDownvotes + 1;
-
-    // Update the video entry
     await knex("videos")
       .where({ id: videoId })
       .update({ downvote: newDownvotes });
-
-    // Fetch the updated video entry
     const updatedVideo = await knex("videos").where({ id: videoId }).first();
-
     res.status(200).json(updatedVideo);
   } catch (error) {
     console.error(
@@ -150,7 +169,6 @@ const updateVote = async (req, res) => {
         .json({ message: `Video with ID ${videoId} not found` });
     }
 
-    // Determine the type of vote
     let currentVotes, newVotes;
 
     if (voteType === "upvote") {
@@ -169,7 +187,6 @@ const updateVote = async (req, res) => {
         .json({ message: 'Invalid voteType. Use "upvote" or "downvote".' });
     }
 
-    // Fetch updated video entry
     const updatedVideo = await knex("videos").where({ id: videoId }).first();
 
     res.status(200).json(updatedVideo);
@@ -181,8 +198,9 @@ const updateVote = async (req, res) => {
 
 module.exports = {
   createVideoEntry,
+  getVideos,
+  getVideo,
   updateUpvote,
   updateDownvote,
-  getVideos,
   updateVote,
 };
