@@ -19,7 +19,7 @@ const getFeed = async (req, res) => {
 
   try {
     const videos = await knex("videos")
-      .select("*")
+      .select("id", "url", "prompt")
       .where("user_id", "!=", decoded.id);
 
     const sortedVideos = videos.sort((a, b) => b.timestamp - a.timestamp);
