@@ -14,6 +14,7 @@ app.use("/api/video", videoRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/feed", feedRouter);
+
 const port = process.env.PORT || 8080;
 
 app.listen(port, () => {
