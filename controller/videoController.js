@@ -88,7 +88,10 @@ const getVideo = async (req, res) => {
   }
 
   try {
-    const video = await knex("videos").where({ id: videoId }).select().first();
+    const video = await knex("videos")
+      .where({ id: videoId, user_id: userId })
+      .select()
+      .first();
 
     if (!video) {
       res.status(404).json({ message: "Video not found" });
