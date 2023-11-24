@@ -16,11 +16,13 @@ const createVideoEntry = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(401).send("Invalid auth token");
+    return;
   }
   const { url, prompt } = req.body;
 
   if (!url || !prompt) {
     res.status(400).json({ message: `Please fill in all fields` });
+    return;
   }
   try {
     const newVideoEntry = {
@@ -32,8 +34,10 @@ const createVideoEntry = async (req, res) => {
     const insertedVideo = await knex("videos").where({ id }).first();
 
     res.status(201).json(insertedVideo);
+    return;
   } catch (error) {
     res.status(500).json({ message: `Error adding Item: ${error}` });
+    return;
   }
 };
 
@@ -51,13 +55,16 @@ const getVideos = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(401).send("Invalid auth token");
+    return;
   }
 
   try {
     const videos = await knex("videos").where({ user_id: userId }).select();
     res.status(200).json(videos);
+    return;
   } catch (error) {
     res.status(500).json({ message: `Error retrieving videos: ${error}` });
+    return;
   }
 };
 
@@ -101,6 +108,7 @@ const getVideo = async (req, res) => {
     res.status(200).json(video);
   } catch (error) {
     res.status(500).json({ message: `Error retrieving video: ${error}` });
+    return;
   }
 };
 
@@ -112,9 +120,8 @@ const updateUpvote = async (req, res) => {
     const video = await knex("videos").where({ id: videoId }).first();
 
     if (!video) {
-      return res
-        .status(404)
-        .json({ message: `Video with ID ${videoId} not found` });
+      res.status(404).json({ message: `Video with ID ${videoId} not found` });
+      return;
     }
 
     const currentUpvotes = video.upvote || 0;
@@ -122,11 +129,13 @@ const updateUpvote = async (req, res) => {
     await knex("videos").where({ id: videoId }).update({ upvote: newUpvotes });
     const updatedVideo = await knex("videos").where({ id: videoId }).first();
     res.status(200).json(updatedVideo);
+    return;
   } catch (error) {
     console.error(
       `Error updating upvote for video with ID ${videoId}: ${error}`
     );
     res.status(500).json({ message: `Error updating upvote count` });
+    return;
   }
 };
 
@@ -138,9 +147,8 @@ const updateDownvote = async (req, res) => {
     const video = await knex("videos").where({ id: videoId }).first();
 
     if (!video) {
-      return res
-        .status(404)
-        .json({ message: `Video with ID ${videoId} not found` });
+      res.status(404).json({ message: `Video with ID ${videoId} not found` });
+      return;
     }
 
     const currentDownvotes = video.downvote || 0;
@@ -150,11 +158,13 @@ const updateDownvote = async (req, res) => {
       .update({ downvote: newDownvotes });
     const updatedVideo = await knex("videos").where({ id: videoId }).first();
     res.status(200).json(updatedVideo);
+    return;
   } catch (error) {
     console.error(
       `Error updating downvote for video with ID ${videoId}: ${error}`
     );
     res.status(500).json({ message: `Error updating downvote count` });
+    return;
   }
 };
 
@@ -167,9 +177,8 @@ const updateVote = async (req, res) => {
     const video = await knex("videos").where({ id: videoId }).first();
 
     if (!video) {
-      return res
-        .status(404)
-        .json({ message: `Video with ID ${videoId} not found` });
+      res.status(404).json({ message: `Video with ID ${videoId} not found` });
+      return;
     }
 
     let currentVotes, newVotes;
@@ -185,17 +194,20 @@ const updateVote = async (req, res) => {
         .where({ id: videoId })
         .update({ downvote: newVotes });
     } else {
-      return res
+      res
         .status(400)
         .json({ message: 'Invalid voteType. Use "upvote" or "downvote".' });
+      return;
     }
 
     const updatedVideo = await knex("videos").where({ id: videoId }).first();
 
     res.status(200).json(updatedVideo);
+    return;
   } catch (error) {
     console.error(`Error updating vote for video with ID ${videoId}: ${error}`);
     res.status(500).json({ message: `Error updating vote count` });
+    return;
   }
 };
 

@@ -16,6 +16,7 @@ const createComment = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(401).send("Invalid auth token");
+    return;
   }
   const videoId = req.params.id;
   const { comments } = req.body;
@@ -24,6 +25,7 @@ const createComment = async (req, res) => {
 
   if (!comments) {
     res.status(400).json({ message: `Please fill in all fields` });
+    return;
   }
   try {
     const newComment = {
@@ -35,8 +37,10 @@ const createComment = async (req, res) => {
     const insertedComment = await knex("comments").where({ id }).first();
 
     res.status(201).json(insertedComment);
+    return;
   } catch (error) {
     res.status(500).json({ message: `Error adding comment: ${error}` });
+    return;
   }
 };
 
@@ -78,6 +82,7 @@ const getComments = async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: `Error retrieving video: ${error}` });
+    return;
   }
 
   try {
@@ -87,6 +92,7 @@ const getComments = async (req, res) => {
     res.status(200).json(comments);
   } catch (error) {
     res.status(500).json({ message: `Error retrieving comments: ${error}` });
+    return;
   }
 };
 

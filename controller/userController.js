@@ -18,6 +18,7 @@ const getUser = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(401).send("Invalid auth token");
+    return;
   }
 };
 
