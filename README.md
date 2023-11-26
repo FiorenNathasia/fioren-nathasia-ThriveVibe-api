@@ -4,7 +4,7 @@ Make sure you have Node.js and npm installed on your machine. Navigate to the ba
 
 ### `npm install`
 
-This will install all the required dependencies specified in the package.json file
+This will install all the required dependencies specified in the package.json after cloning the thrivevibe-api repository
 
 ## 2. Create .env file:
 
